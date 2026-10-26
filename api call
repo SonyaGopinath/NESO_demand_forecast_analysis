@@ -1,0 +1,38 @@
+import requests
+import pandas as pd
+
+url = "https://api.neso.energy/api/3/action/datastore_search"
+
+resource_id = "08e41551-80f8-4e28-a416-ea473a695db9"
+
+all_records = []
+limit = 1000
+offset = 0
+
+while True:
+    params = {
+        "resource_id": resource_id,
+        "limit": limit,
+        "offset": offset
+    }
+
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    records = data["result"]["records"]
+
+    all_records.extend(records)
+
+    print(f"Downloaded {len(all_records)} records")
+
+    if len(records) < limit:
+        break
+
+    offset += limit
+
+df = pd.DataFrame(all_records)
+
+df.to_csv("data/demand_forecast_performance.csv", index=False)
+
+print(df.shape)
+print(df.head())
